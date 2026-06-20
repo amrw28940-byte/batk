@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
+import { FaBars, FaTimes, FaSearch } from 'react-icons/fa';
 
 const SnowBackground = dynamic(() => import('./SnowBackground'), { ssr: false });
 
 export default function Header() {
   const [text, setText] = useState("");
-  const [isDone, setIsDone] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const fullText = "بيتك هدفنا صحة بيتك";
 
   useEffect(() => {
@@ -16,62 +17,58 @@ export default function Header() {
     const interval = setInterval(() => {
       setText(fullText.slice(0, i));
       i++;
-      if (i > fullText.length) {
-        clearInterval(interval);
-        setIsDone(true);
-      }
+      if (i > fullText.length) clearInterval(interval);
     }, 150);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    // التعديل: border-[6px] border-black يحيط بالهيدر كاملاً مع الحواف الدائرية
-    <header className="relative w-full bg-orange-600 border-[6px] border-black shadow-[0_10px_0_rgba(0,0,0,0.5)] rounded-2xl mt-4 max-w-7xl mx-auto min-h-[220px] overflow-hidden">
-      
+    <header className="relative w-full bg-orange-600 border-[6px] border-black shadow-[0_10px_0_rgba(0,0,0,0.5)] rounded-2xl mt-4 max-w-7xl mx-auto overflow-visible">
       <SnowBackground />
       
-      <div className="relative z-10 container mx-auto px-8">
-        {/* الصف العلوي */}
-        <div className="flex justify-between items-center py-6">
-          <Image src="/betakk.png" alt="Logo" width={140} height={70} className="object-contain" />
+      <div className="relative z-10 px-4 py-4">
+        {/* صف اللوجو والايقونات (ثابت في الموبايل والكمبيوتر) */}
+        <div className="flex justify-between items-center">
+          <button className="md:hidden text-white text-3xl" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <FaTimes /> : <FaBars />}
+          </button>
           
-          <div className={`text-white font-extrabold text-3xl ${isDone ? "animate-pulse" : ""}`}>
-            {text}
-          </div>
+          <Image src="/betakk.png" alt="Logo" width={100} height={50} className="object-contain md:w-[140px]" />
           
-          {/* الأيقونات الدائرية باللون الأبيض */}
-          <div className="flex items-center gap-4">
-            {[ 
-              { src: "/WhatsApp.webp", alt: "واتساب" },
-              { src: "/Facebook.png", alt: "فيسبوك" },
-              { src: "/Shopping cart.png", alt: "عربة التسوق" }
-            ].map((item, idx) => (
-              <a key={idx} href="#" className="p-3 bg-white rounded-full hover:bg-gray-100 transition-all border-2 border-black">
-                <Image src={item.src} alt={item.alt} width={24} height={24} />
+          <div className="flex items-center gap-2">
+            {[ "/WhatsApp.webp", "/Facebook.png", "/Shopping cart.png" ].map((src, idx) => (
+              <a key={idx} href="#" className="p-2 bg-white rounded-full border-2 border-black">
+                <Image src={src} alt="icon" width={20} height={20} />
               </a>
             ))}
           </div>
         </div>
 
-        {/* الصف السفلي (القائمة والبحث) */}
-        <nav className="flex justify-between items-center py-5 border-t-[4px] border-black/20">
-          <ul className="flex gap-8 font-bold text-white text-lg">
-            <li className="cursor-pointer hover:underline underline-offset-8">الرئيسية </li>
-            <li className="cursor-pointer hover:underline underline-offset-8">من نحن</li>
-            <li className="cursor-pointer hover:underline underline-offset-8">المنتجات</li>
-            <li className="cursor-pointer hover:underline underline-offset-8">اتصل بنا</li>
-          </ul>
+        {/* النص يظهر هنا للجميع */}
+        <div className="text-center text-white font-extrabold text-xl md:text-3xl py-2">
+          {text}
+        </div>
 
-          <div className="relative w-full max-w-sm">
-            <input 
-              type="text" 
-              placeholder="ابحث عن منتجاتك المميزة..." 
-              className="w-full pl-4 pr-12 py-3 rounded-full border-[3px] border-black bg-white text-black text-sm focus:outline-none" 
-            />
-            <svg className="absolute left-4 top-3 text-black" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+        {/* الخط الفاصل */}
+        <div className="border-t-2 border-black/20 my-2"></div>
+
+        {/* القائمة والبحث */}
+        {/* في الموبايل: تظهر القائمة فقط عند الضغط، في الكمبيوتر: تظهر دائماً */}
+        <nav className={`${isOpen ? 'flex' : 'hidden'} md:flex flex-col md:flex-row justify-between items-center gap-4 py-2`}>
+          
+          {/* البحث (ظاهر دائماً في الموبايل والكمبيوتر) */}
+          <div className="relative w-full md:max-w-xs order-1 md:order-2">
+            <input type="text" placeholder="ابحث..." className="w-full px-4 py-2 rounded-full border-2 border-black bg-white text-black text-sm focus:outline-none" />
+            <FaSearch className="absolute left-4 top-2.5" />
           </div>
+
+          {/* الروابط */}
+          <ul className="flex flex-col md:flex-row gap-4 font-bold text-white text-lg order-2 md:order-1 text-center">
+            <li className="cursor-pointer hover:underline">الرئيسية</li>
+            <li className="cursor-pointer hover:underline">من نحن</li>
+            <li className="cursor-pointer hover:underline">المنتجات</li>
+            <li className="cursor-pointer hover:underline">اتصل بنا</li>
+          </ul>
         </nav>
       </div>
     </header>
